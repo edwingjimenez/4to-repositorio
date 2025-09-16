@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot con GPT-OSS-120B</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>Chatbot con GPT-OSS-120B</h1>
+            <p>Conectado a OpenRouter usando el modelo GPT-OSS-120b</p>
+        </div>
+        
+        <div class="api-config">
+            <h3>Configuración de API Key</h3>
+            <div class="api-input">
+                <input type="password" id="apiKeyInput" placeholder="Ingresa tu API Key de OpenRouter">
+                <button id="saveApiKey">Guardar</button>
+            </div>
+            <p class="info-message">Para obtener una API Key, regístrate en <a href="https://openrouter.ai/" target="_blank">OpenRouter</a> y crea una clave API desde tu dashboard.</p>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                <div class="message-content">
+                    <p>¡Hola! Soy un chatbot impulsado por el modelo GPT-OSS-120B de OpenAI. Por favor, ingresa tu API Key de OpenRouter para comenzar.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <textarea id="userInput" placeholder="Escribe tu mensaje aquí..." rows="1" disabled></textarea>
+            <button id="sendButton" disabled>Enviar</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
