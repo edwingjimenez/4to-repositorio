@@ -4,7 +4,252 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot con GPT-OSS-120B</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 85vh;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .api-config {
+            background-color: #f8fafc;
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .api-config h3 {
+            margin-bottom: 10px;
+            color: #475569;
+            font-size: 16px;
+        }
+
+        .api-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .api-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .api-input button {
+            padding: 10px 20px;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: #f8fafc;
+        }
+
+        .message {
+            display: flex;
+            max-width: 80%;
+        }
+
+        .user-message {
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 18px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message .message-content {
+            background-color: white;
+            color: #334155;
+            border-bottom-left-radius: 5px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .message-content p {
+            line-height: 1.5;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #e2e8f0;
+            gap: 10px;
+            background-color: white;
+        }
+
+        .chat-input textarea {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            resize: none;
+            outline: none;
+            font-size: 16px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .chat-input button {
+            padding: 12px 24px;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .chat-input button:hover {
+            transform: scale(1.03);
+        }
+
+        .chat-input button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: white;
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #94a3b8;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: typing-animation 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing-animation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .error-message {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ef4444;
+        }
+
+        .info-message {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .info-message a {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 95vh;
+                border-radius: 10px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .api-input {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="chat-container">
@@ -19,7 +264,7 @@
                 <input type="password" id="apiKeyInput" placeholder="Ingresa tu API Key de OpenRouter">
                 <button id="saveApiKey">Guardar</button>
             </div>
-            <p class="info-message">Para obtener una API Key, regístrate en <a href="https://openrouter.ai/" target="_blank">OpenRouter</a> y crea una clave API desde tu dashboard.</p>
+            <p class="info-message">Para obtener una API Key, regístrate en <a href="https://openrouter.ai/" target="_blank">OpenRouter</a> y crea una clave API desde tu dashboard. Asegúrate de tener acceso al modelo GPT-OSS-120B.</p>
         </div>
         
         <div class="chat-messages" id="chatMessages">
@@ -36,6 +281,152 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chatMessages');
+            const userInput = document.getElementById('userInput');
+            const sendButton = document.getElementById('sendButton');
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const saveApiKeyButton = document.getElementById('saveApiKey');
+            
+            let apiKey = localStorage.getItem('openrouter_api_key');
+            
+            // Si ya hay una API key guardada, la cargamos
+            if (apiKey) {
+                apiKeyInput.value = apiKey;
+                enableChat();
+                addMessage('API Key cargada correctamente. ¡Ya puedes chatear con el modelo GPT-OSS-120B!', 'bot');
+            }
+            
+            // Guardar la API key
+            saveApiKeyButton.addEventListener('click', function() {
+                apiKey = apiKeyInput.value.trim();
+                if (apiKey) {
+                    localStorage.setItem('openrouter_api_key', apiKey);
+                    enableChat();
+                    addMessage('API Key guardada correctamente. ¡Ahora puedes chatear con el modelo GPT-OSS-120B!', 'bot');
+                } else {
+                    addMessage('Por favor, ingresa una API Key válida.', 'bot', true);
+                }
+            });
+            
+            // Autoajustar altura del textarea
+            userInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            
+            // Enviar mensaje al hacer clic en el botón
+            sendButton.addEventListener('click', sendMessage);
+            
+            // Enviar mensaje al presionar Enter
+            userInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            function enableChat() {
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.placeholder = 'Escribe tu mensaje aquí...';
+            }
+            
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (message === '') return;
+                
+                // Agregar mensaje del usuario al chat
+                addMessage(message, 'user');
+                userInput.value = '';
+                userInput.style.height = 'auto';
+                
+                // Mostrar indicador de escritura
+                const typingIndicator = addTypingIndicator();
+                
+                // Enviar mensaje al servidor Flask
+                sendToFlask(message, typingIndicator);
+            }
+            
+            function sendToFlask(message, typingIndicator) {
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        api_key: apiKey
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Eliminar indicador de escritura
+                    chatMessages.removeChild(typingIndicator);
+                    
+                    if (data.error) {
+                        addMessage('Error: ' + data.error, 'bot', true);
+                        
+                        // Sugerencia específica para el error "User not found"
+                        if (data.error.includes('not found') || data.error.includes('invalid api key')) {
+                            addMessage('Sugerencia: Verifica que tu API Key de OpenRouter sea correcta y que tengas acceso al modelo GPT-OSS-120B. Puedes verificar tu API Key en https://openrouter.ai/keys', 'bot', true);
+                        }
+                    } else {
+                        addMessage(data.reply, 'bot');
+                    }
+                })
+                .catch(error => {
+                    chatMessages.removeChild(typingIndicator);
+                    addMessage('Error de conexión con el servidor Flask. Asegúrate de que el servidor esté ejecutándose.', 'bot', true);
+                    console.error('Error:', error);
+                });
+            }
+            
+            function addMessage(content, sender, isError = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', `${sender}-message`);
+                
+                const messageContent = document.createElement('div');
+                if (isError) {
+                    messageContent.classList.add('error-message');
+                } else {
+                    messageContent.classList.add('message-content');
+                }
+                
+                const messageParagraph = document.createElement('p');
+                messageParagraph.textContent = content;
+                
+                messageContent.appendChild(messageParagraph);
+                messageDiv.appendChild(messageContent);
+                chatMessages.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function addTypingIndicator() {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', 'bot-message');
+                
+                const messageContent = document.createElement('div');
+                messageContent.classList.add('typing-indicator');
+                
+                for (let i = 0; i < 3; i++) {
+                    const dot = document.createElement('div');
+                    dot.classList.add('typing-dot');
+                    messageContent.appendChild(dot);
+                }
+                
+                messageDiv.appendChild(messageContent);
+                chatMessages.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                return messageDiv;
+            }
+        });
+    </script>
 </body>
 </html>
